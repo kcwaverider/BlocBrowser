@@ -36,7 +36,7 @@
     self.textField.returnKeyType = UIReturnKeyDone;
     self.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
     self.textField.autocorrectionType = UITextAutocorrectionTypeNo;
-    self.textField.placeholder = NSLocalizedString(@"Website URL", @"Placeholder text for web browser URL field");
+    self.textField.placeholder = NSLocalizedString(@"Website URL or Search Term", @"Placeholder text for web browser URL field or a search term");
     self.textField.backgroundColor = [UIColor colorWithWhite:220/255.0f alpha:1];
     self.textField.delegate = self;
     
@@ -111,9 +111,20 @@
 -(BOOL) textFieldShouldReturn:(UITextField *)textField {
     [textField resignFirstResponder];
     
-    NSString *URLString = textField.text;
+    NSMutableString *URLString = [textField.text mutableCopy];
     
-    NSURL * URL = [NSURL URLWithString:URLString];
+    // Check to see if there are spaces
+    NSRange firstSpaceCharacterRange = [URLString rangeOfString:@" "];
+    
+    if (firstSpaceCharacterRange.location != NSNotFound) {
+        
+        [URLString replaceOccurrencesOfString:@" " withString:@"+" options:NSLiteralSearch range:NSMakeRange(0,URLString.length)];
+        NSMutableString *googleSearchURL = [@"http://www.google.com/search?q=" mutableCopy];
+        [googleSearchURL appendString:[NSString stringWithString:URLString]];
+        URLString = googleSearchURL;
+    }
+    
+    NSURL *URL = [NSURL URLWithString:URLString];
     
     if (!URL.scheme) {
         URL = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@", URLString]];
