@@ -14,7 +14,7 @@
  Replaces the web view with a fresh one, erasing all history. Also updates the URL field and toolbar buttons appropriately
  */
 - (void)resetWebView;
-
+- (void) welcomeMessageSplash ;
 
 @end
 

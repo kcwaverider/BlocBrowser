@@ -31,7 +31,7 @@
     self.webView = [WKWebView new];
     self.webView.navigationDelegate = self;
     
-    [self welcomeMessageSplash];
+  //  [self welcomeMessageSplash];
     
     self.textField = [UITextField new];
     self.textField.keyboardType = UIKeyboardTypeURL;
