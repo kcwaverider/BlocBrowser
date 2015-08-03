@@ -1,5 +1,5 @@
 //
-//  AwesomeFloatingToobar.h
+//  AwesomeFloatingToolbar.h
 //  BlocBrowser
 //
 //  Created by Chad Clayton on 7/24/15.
@@ -17,7 +17,7 @@
 
 @end
 
-@interface AwesomeFloatingToobar : UIView
+@interface AwesomeFloatingToolbar : UIView
 
 - (instancetype) initWithFourTitles:(NSArray *)titles;
 

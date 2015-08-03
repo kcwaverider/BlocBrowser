@@ -1,14 +1,14 @@
 //
-//  AwesomeFloatingToobar.m
+//  AwesomeFloatingToolbar.m
 //  BlocBrowser
 //
 //  Created by Chad Clayton on 7/24/15.
 //  Copyright (c) 2015 Chad Clayton. All rights reserved.
 //
 
-#import "AwesomeFloatingToobar.h"
+#import "AwesomeFloatingToolbar.h"
 
-@interface AwesomeFloatingToobar ()
+@interface AwesomeFloatingToolbar ()
 
 @property (nonatomic, strong) NSArray *currentTitles;
 @property (nonatomic, strong) NSArray *colors;
@@ -17,7 +17,7 @@
 
 @end
 
-@implementation AwesomeFloatingToobar
+@implementation AwesomeFloatingToolbar
 
 - (instancetype) initWithFourTitles:(NSArray *)titles {
     
@@ -99,8 +99,70 @@
 #pragma mark - Touch Handling
 
 -(UILabel *) labelFromTouches: (NSSet *)touches withEvent:(UIEvent *) event {
+    UITouch *touch = [touches anyObject];
+    CGPoint location = [touch locationInView:self];
+    UIView *subview = [self hitTest:location withEvent:event];
     
+    if ([subview isKindOfClass:[UILabel class]]) {
+        return (UILabel *)subview;
+    } else {
+        return nil;
+    }
 }
+
+- (void)touchesBegan:(NSSet *) touches withEvent:(UIEvent *)event {
+    UILabel *label = [self labelFromTouches:touches withEvent:event];
+    
+    self.currentLabel = label;
+    self.currentLabel.alpha = 0.5;
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event {
+    UILabel *label = [self labelFromTouches:touches withEvent:event];
+    
+    if (self.currentLabel != label)  {
+        // The label being touched is no longer the initial label
+        self.currentLabel.alpha = 1;
+    } else {
+        // The label beign touched is the initial label
+        self.currentLabel.alpha = 1;
+    }
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
+    UILabel *label = [self labelFromTouches:touches withEvent:event];
+    
+    if (self.currentLabel == label) {
+        NSLog(@"Label tapped: %@", self.currentLabel.text);
+        
+        if ([self.delegate respondsToSelector:@selector(floatingToolbar:didSelectButtonWithTitle:)]) {
+            [self.delegate floatingToolbar:self didSelectButtonWithTitle:self.currentLabel.text];
+        }
+    }
+    
+    self.currentLabel.alpha = 1;
+    self.currentLabel = nil;
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event {
+    self.currentLabel.alpha = 1;
+    self.currentLabel = nil;
+}
+
+#pragma mark - Button Enabling
+
+- (void) setEnabled:(BOOL)enabled forButtonWithTitle:(NSString *)title {
+    NSUInteger index = [self.currentTitles indexOfObject:title];
+
+    if (index != NSNotFound) {
+        UILabel *label = [self.labels objectAtIndex:index];
+        label.userInteractionEnabled = enabled;
+        label.alpha = enabled ? 1.0 : 0.25;
+    }
+}
+
+
+
 
 
 @end
