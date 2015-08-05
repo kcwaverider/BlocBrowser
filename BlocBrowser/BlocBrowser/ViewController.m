@@ -27,11 +27,21 @@
 
 @implementation ViewController
 
+CGFloat toolbarWidth = 280;
+CGFloat toolbarHeight = 60;
+CGFloat toolbarXLocation = 20;
+CGFloat toolbarYLocation = 100;
+CGFloat toolbarXRatio;
+CGFloat toolbarYRatio;
+BOOL flag = YES;
+
+
+
+
 #pragma mark - UIViewController
 
 - (void)loadView {
     UIView *mainView = [UIView new];
-    
     self.webView = [WKWebView new];
     self.webView.navigationDelegate = self;
     
@@ -50,11 +60,18 @@
     self.awesomeToolbar.delegate = self;
     
     
+    
+    
     for (UIView *viewToAdd in @[self.webView, self.textField, self.awesomeToolbar]) {
         [mainView addSubview:viewToAdd];
     }
     
     self.view = mainView;
+    //[self calculateToolbarRatios];
+    
+    // Set the starting point for the toolbar
+    
+    
 }
 
 - (void)viewDidLoad {
@@ -75,12 +92,24 @@
     CGFloat width = CGRectGetWidth(self.view.bounds);
     CGFloat browserHeight = CGRectGetHeight(self.view.bounds) -  itemHeight;
     
+
+    
+    
     
     // Now assign the frames
     self.textField.frame = CGRectMake(0, 0, width, itemHeight);
     self.webView.frame = CGRectMake(0, CGRectGetMaxY(self.textField.frame), width, browserHeight);
     
-    self.awesomeToolbar.frame = CGRectMake(20, 100, 280, 60);
+    if (flag) {
+        toolbarXRatio = toolbarXLocation / CGRectGetWidth(self.webView.frame);
+        toolbarYRatio = toolbarYLocation / CGRectGetHeight(self.webView.frame);
+        flag = NO;
+    }
+    
+    self.awesomeToolbar.frame = CGRectMake(toolbarXRatio * CGRectGetWidth(self.webView.frame), toolbarYRatio * CGRectGetHeight(self.webView.frame), toolbarWidth, toolbarHeight);
+    // NSLog(@"Frame Height: %f", CGRectGetHeight(self.webView.frame));
+    // NSLog(@"Y ratio: %f", toolbarYRatio);
+    // NSLog(@"Y location: %f", self.awesomeToolbar.frame.origin.y);
 
 }
 
@@ -195,19 +224,23 @@
     [self presentViewController:welcomeMessage animated:YES completion:nil];
 }
 
+
 #pragma mark - AwesomeFloatingToolbarDelegate
 
-- (void) floatingToolbar:(AwesomeFloatingToolbar *) toolbar didSelectButtonWithTitle:(NSString *)title {
-    if ([title isEqual:NSLocalizedString(@"Back", @"Back Command")]) {
+- (void) floatingToolbar:(AwesomeFloatingToolbar *) toolbar didSelectButtonWithTitle:(NSString *)label {
+    NSLog(@"Label: %@", label);
+    if ([label isEqual: kWebBrowserBackString]) {
         [self.webView goBack];
-    } else if ([title isEqual:NSLocalizedString(@"Forward", @"Forward Command")]) {
+    } else if ([label isEqual:kWebBrowserForwardString]) {
         [self.webView goForward];
-    } else if ([title isEqual:NSLocalizedString(@"Stop", @"Stop Command")]) {
+    } else if ([label isEqual:kWebBrowserStopString]) {
         [self.webView stopLoading];
-    } else if ([title isEqual:NSLocalizedString(@"Refresh", @"Reload Command")]) {
+    } else if ([label isEqual:kWebBrowserRefreshString]) {
         [self.webView reload];
     }
 }
+
+ 
 
 - (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didTryToPanWithOffset:(CGPoint)offset {
     CGPoint startingPoint = toolbar.frame.origin;
@@ -217,7 +250,49 @@
     
     if (CGRectContainsRect(self.view.bounds, potentialNewFrame)) {
         toolbar.frame = potentialNewFrame;
+        toolbarXLocation = potentialNewFrame.origin.x;
+        toolbarYLocation = potentialNewFrame.origin.y;
+        [self calculateToolbarRatios];
     }
+}
+
+- (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didTryToPinchWithScale:(CGFloat)scale {
+    
+    CGPoint pinchStartingPoint = toolbar.frame.origin;
+    
+    
+    CGFloat startWidth = CGRectGetWidth(toolbar.frame);
+    CGFloat startHeight = CGRectGetHeight(toolbar.frame);
+   
+    CGFloat newWidth = startWidth * scale;
+    CGFloat newHeight = startHeight * scale;
+    CGPoint newStartingPoint = CGPointMake(pinchStartingPoint.x + (startWidth - newWidth) /2 , pinchStartingPoint.y + (startHeight - newHeight) / 2);
+    
+    
+
+    CGRect potentialNewFrame = CGRectMake(newStartingPoint.x , newStartingPoint.y, newWidth, newHeight);
+    
+    if (CGRectContainsRect(self.view.bounds, potentialNewFrame) && newWidth >= (280 / 2) && newHeight >= (60 / 2)) {
+        toolbar.frame = potentialNewFrame;
+        toolbarXLocation = potentialNewFrame.origin.x;
+        toolbarYLocation = potentialNewFrame.origin.y;
+        toolbarWidth = potentialNewFrame.size.width;
+        toolbarHeight = potentialNewFrame.size.height;
+        [self calculateToolbarRatios];
+    }
+    NSLog(@"Toolbar origin - X: %f Y: %f", pinchStartingPoint.x, pinchStartingPoint.y);
+    NSLog(@"Start width: %f", startWidth);
+    NSLog(@"Scale: %f", scale);
+    NSLog(@"New width: %f", newWidth);
+}
+
+- (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didTryLongPress:(CGPoint)location {
+    
+}
+
+- (void) calculateToolbarRatios {
+    toolbarXRatio = toolbarXLocation / CGRectGetWidth(self.webView.frame);
+    toolbarYRatio = toolbarYLocation / CGRectGetHeight(self.webView.frame);
 }
 
 

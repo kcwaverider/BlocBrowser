@@ -13,8 +13,10 @@
 @protocol AwesomeFloatingToolbarDelegate <NSObject>
 
 @optional
-- (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didSelectButtonWithTitle:(NSString *)title;
+- (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didSelectButtonWithTitle:(NSString *)label;
 - (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didTryToPanWithOffset:(CGPoint) offset;
+- (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didTryToPinchWithScale:(CGFloat) scale;
+- (void) floatingToolbar:(AwesomeFloatingToolbar *)toolbar didTryLongPress: (CGPoint) location;
 
 @end
 
@@ -25,5 +27,6 @@
 - (void) setEnabled:(BOOL)enabled forButtonWithTitle:(NSString *)title;
 
 @property (nonatomic, weak) id <AwesomeFloatingToolbarDelegate> delegate;
+
 
 @end
