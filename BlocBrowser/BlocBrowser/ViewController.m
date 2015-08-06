@@ -45,10 +45,10 @@ BOOL flag = YES;
     self.webView = [WKWebView new];
     self.webView.navigationDelegate = self;
     
-  //  [self welcomeMessageSplash];
+    [self welcomeMessageSplash];
     
     self.textField = [UITextField new];
-    self.textField.keyboardType = UIKeyboardTypeURL;
+    self.textField.keyboardType = UIKeyboardTypeWebSearch;
     self.textField.returnKeyType = UIReturnKeyDone;
     self.textField.autocapitalizationType = UITextAutocapitalizationTypeNone;
     self.textField.autocorrectionType = UITextAutocorrectionTypeNo;
@@ -122,10 +122,15 @@ BOOL flag = YES;
     
     // Check to see if there are spaces
     NSRange firstSpaceCharacterRange = [URLString rangeOfString:@" "];
+    NSRange dotCharacterRange = [URLString rangeOfString:@"."];
     
     if (firstSpaceCharacterRange.location != NSNotFound) {
         
         [URLString replaceOccurrencesOfString:@" " withString:@"+" options:NSLiteralSearch range:NSMakeRange(0,URLString.length)];
+        NSMutableString *googleSearchURL = [@"http://www.google.com/search?q=" mutableCopy];
+        [googleSearchURL appendString:[NSString stringWithString:URLString]];
+        URLString = googleSearchURL;
+    } else if (dotCharacterRange.location == NSNotFound) {
         NSMutableString *googleSearchURL = [@"http://www.google.com/search?q=" mutableCopy];
         [googleSearchURL appendString:[NSString stringWithString:URLString]];
         URLString = googleSearchURL;
